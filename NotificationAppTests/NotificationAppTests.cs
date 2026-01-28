@@ -60,7 +60,19 @@ namespace NotificationApp.Tests
             // Act & Assert
 
         }
+        [Test]
+        public void NotifyUser_WithEmptyMessage_ThrowsArgumentException()
+        {
+            //Arrange
+            var user = new User { Id = 1, Email = "user@example.com", IsActive = true };
+            _mockUserRepo.Setup(repo => repo.GetUserById(4)).Returns(user);
+
+            //Act & Assert
+            Assert.Throws<ArgumentException>(() => _notificationService.NotifyUser(4, ""));
+
+        }
 
 
     }
 }
+
