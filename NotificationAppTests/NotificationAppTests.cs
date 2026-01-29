@@ -4,6 +4,7 @@ using NotificationApp.Entities;
 using NotificationApp.Interfaces;
 using NotificationApp.Services;
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace NotificationApp.Tests
 {
@@ -71,8 +72,28 @@ namespace NotificationApp.Tests
             Assert.Throws<ArgumentException>(() => _notificationService.NotifyUser(4, ""));
 
         }
+        [TestCase(1, "user1@example.com", true, "First message")]
+        [TestCase(2, "user2@example.com", true, "Second message")]
+        [TestCase(3, "user3@example.com", false, null)]
 
+        public void NotifyUser_WithDifferentUsers_ShouldBehaveCorrectly(int userId, string email, bool isActive, string message)
+        {
+            var user = new User { Id = userId, Email = email, IsActive = isActive};
+            _mockUserRepo.Setup(repo => repo.GetUserById(userId)).Returns(user);
 
+            if (!isActive)
+            {
+                Assert.Throws<InvalidOperationException>(() => _notificationService.NotifyUser(userId, "Test message"));
+            }
+            else 
+            {
+                _notificationService.NotifyUser(userId, message);
+
+                _mockNotifier.Verify(n => n.Send(email, message), Times.Once);
+
+            }
+
+        }
     }
 }
 
